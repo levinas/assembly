@@ -37,13 +37,13 @@ from ConfigParser import SafeConfigParser
 
 class ArastConsumer:
     def __init__(self, shockurl, rmq_host, rmq_port, arasturl, config, threads, queue, 
-                 kill_queue, job_list, job_list_lock, ctrl_conf, datapath, binpath):
+                 kill_queue, job_list, job_list_lock, ctrl_conf, datapath, binpath, moddisc):
         self.parser = SafeConfigParser()
         self.parser.read(config)
         self.job_list = job_list
         self.job_list_lock = job_list_lock
         # Load plugins
-        self.pmanager = ModuleManager(threads, kill_queue, job_list, binpath)
+        self.pmanager = ModuleManager(threads, kill_queue, job_list, binpath, moddisc)
 
     # Set up environment
         self.shockurl = shockurl

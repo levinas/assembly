@@ -30,7 +30,7 @@ job_list = mgr.list()
 job_list_lock = multiprocessing.Lock()
 kill_list = mgr.list()
 
-def start(arasturl, config, num_threads, queue, datapath, binpath):
+def start(arasturl, config, num_threads, queue, datapath, binpath, moddisc):
 
     #### Get default configuration from ar_compute.conf
     print " [.] Starting Assembly Service Compute Node"    
@@ -113,7 +113,7 @@ def start(arasturl, config, num_threads, queue, datapath, binpath):
     for i in range(int(num_threads)):
         worker_name = "[Worker %s]:" % i
         compute = consume.ArastConsumer(shockurl, rmq_host, rmq_port, arasturl, config, num_threads, 
-                                        queue, kill_list, job_list, job_list_lock, ctrl_conf, datapath, binpath)
+                                        queue, kill_list, job_list, job_list_lock, ctrl_conf, datapath, binpath, moddisc)
         logging.info("[Master]: Starting %s" % worker_name)
         p = multiprocessing.Process(name=worker_name, target=compute.start)
         workers.append(p)
@@ -166,6 +166,8 @@ parser.add_argument("-d", "--compute-data", dest='datapath', help="specify a dir
                     action="store", required=False)
 parser.add_argument("-b", "--compute-bin", dest='binpath', help="specify a directory for computation binaries",
                     action="store", required=False)
+parser.add_argument("-m", "--module-discovery", dest='moddisc', help="only use modules that are installed",
+                    action="store_true", required=False)
 
 args = parser.parse_args()
 if args.verbose:
@@ -176,5 +178,6 @@ queue = args.queue or None
 num_threads = args.threads or None
 datapath = args.datapath or None
 binpath = args.binpath or None
+moddisc = args.moddisc or None
 
-start(arasturl, args.config, num_threads, queue, datapath, binpath)
+start(arasturl, args.config, num_threads, queue, datapath, binpath, moddisc)

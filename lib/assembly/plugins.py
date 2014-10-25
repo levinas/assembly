@@ -604,11 +604,12 @@ class BaseAligner(BasePlugin):
 
 
 class ModuleManager():
-    def __init__(self, threads, kill_list, job_list, binpath):
+    def __init__(self, threads, kill_list, job_list, binpath, moddisc):
         self.threads = threads
         self.kill_list = kill_list
         self.job_list = job_list # Running jobs
         self.binpath = binpath
+        self.moddisc = moddisc
 
         self.root_path = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', '..'))
         self.module_bin_path = os.path.join(self.root_path, "module_bin")
@@ -636,15 +637,18 @@ class ModuleManager():
                 version = plugin.details.get('Documentation', 'Version')
                 executables = plugin.details.items('Executables')
                 full_execs = [(k, self.get_executable_path(v)) for k,v in executables]
+                self.executables[plugin.name] = full_execs
                 for binary in full_execs:
                     if not os.path.exists(binary[1]):
+                        self.executables.pop(plugin.name, None)
+                        if moddisc: continue
                         if float(version) < 1: 
                             print '[Warning]: {} (v{}) -- Binary does not exist for beta plugin -- {}'.format(plugin.name, version, binary[1])
                         else:
                             raise Exception('[ERROR]: {} (v{})-- Binary does not exist -- {}'.format(plugin.name, version, binary[1]))
-                self.executables[plugin.name] = full_execs
             except ConfigParser.NoSectionError: pass
-            plugins.append(plugin.name)
+            if plugin.name in self.executables:
+                plugins.append(plugin.name)
         print "Plugins found [{}]: {}".format(num_plugins, sorted(plugins))
 
 
